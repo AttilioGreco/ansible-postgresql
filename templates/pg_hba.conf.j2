@@ -1,0 +1,8 @@
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+{% for option_line in pg_hba_user_options -%}
+ {{ " " + option_line.type  }} {{ option_line.database  }} {{ option_line.user  }} {{ option_line.address  }} {{ option_line.method  }}
+{% endfor %}
+
+{% for option_line in pg_hba_default_options -%}
+ {{ " " + option_line.type  }} {{ option_line.database  }} {{ option_line.user  }} {{ option_line.address  }} {{ option_line.method  }}
+{% endfor %}

@@ -1,0 +1,12 @@
+
+- name: postgres | init_postgres | init database
+  ansible.builtin.command: /usr/pgsql-{{postgres_version}}/bin/postgresql-{{postgres_version}}-setup initdb
+  register: postgresql_database_init
+  args:
+    creates: /var/lib/pgsql/13/initdb.log
+  notify:
+    - start postgreql
+
+- name: postgres | init_postgres | show posgres init
+  debug:
+    var: postgresql_database_init

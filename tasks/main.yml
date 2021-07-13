@@ -1,0 +1,4 @@
+---
+- import_tasks: tasks/install.yml
+- import_tasks: tasks/init_postgres.yml
+- import_tasks: configure_postgres.yml

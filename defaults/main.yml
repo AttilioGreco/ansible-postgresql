@@ -1,0 +1,26 @@
+---
+# defaults file for postgres
+postgres_repo: 'https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm'
+postgres_version: 13
+
+pg_hba_user_options:
+- contype: host
+  users: all
+  source: 127.0.0.1/32
+  databases: all
+  method: md5
+- contype: host
+  users: all
+  source: 192.168.100.10/24
+  databases: all
+  method: md5
+- contype: host
+  users: all
+  source: 192.168.200.1/24
+  databases: all
+  method: md5
+- contype: host
+  users: all
+  source: 192.169.100.1/24
+  databases: all
+  method: md5
