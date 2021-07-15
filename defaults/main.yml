@@ -2,6 +2,18 @@
 # defaults file for postgres
 postgres_repo: 'https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm'
 postgres_version: 13
+postgis_install: true
+postgis_version: 31
+pg_config_listen_addresses: localhost
+pg_config_port: 5432
+pg_config_max_connections: 1024
+pg_config_shared_buffers: 32MB
+pg_config_temp_buffers: 8MB
+pg_config_work_mem: 4MB
+pg_config_max_wal_size: 1GB
+pg_config_min_wal_size: 80MB
+pg_config_log_filename: postgresql-%Y-%m-%d_%H%M%S.log
+pg_config_timezone: 'Europe/Rome'
 
 pg_hba_user_options:
 - contype: host

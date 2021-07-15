@@ -5,4 +5,17 @@
   tasks:
     - name: "Include postgres"
       include_role:
-        name: "postgres"
+        name: "ansible-postgresql"
+      vars:
+        pg_config_listen_addresses: '*'
+        pg_hba_user_options:
+        - contype: host
+          users: all
+          source: 127.0.0.1/32
+          databases: all
+          method: md5
+        - contype: host
+          users: all
+          source: 10.10.10.1/24
+          databases: all
+          method: md5
