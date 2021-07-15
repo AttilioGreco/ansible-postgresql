@@ -17,3 +17,25 @@
       - postgresql{{postgres_version}}
       - postgresql{{postgres_version}}-server
     state: present
+
+- name: postgres | install | epel-release
+  dnf:
+    name: epel-release
+    state: present
+
+- name: postgres | install | enabled repo powertools
+  yum_repository:
+    name: powertools
+    description: Rocky Linux $releasever - PowerTools
+    file: external_repos
+    mirrorlist: https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=PowerTools-$releasever
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rockyofficial
+    enabled: yes
+
+- name: postgres | install | install postgis
+  dnf:
+    enablerepo: powertools
+    name:
+      - postgis31_13
+    state: present
+  when: postgis_install
