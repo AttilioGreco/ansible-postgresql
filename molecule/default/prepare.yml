@@ -1,7 +1,18 @@
+- name: Connection Wait
+  hosts: all
+  become: true
+  gather_facts: no
+  tasks:
+  - name: Wait 60 seconds, but only start checking after 15 seconds
+    wait_for_connection:
+      delay: 15
+      timeout: 60
+
 - name: prepare
   hosts: all
   become: true
   tasks:
+
   - name: prepare | install python3-pip
     dnf:
       name:

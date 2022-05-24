@@ -710,8 +710,11 @@ lc_time = 'en_US.UTF-8'				# locale for time formatting
 default_text_search_config = 'pg_catalog.english'
 
 # - Shared Library Preloading -
-
+{% if pg_config_shared_preload_libraries %}
+shared_preload_libraries = '{{ pg_config_shared_preload_libraries | join(',') }}'
+{% else %}
 #shared_preload_libraries = ''	# (change requires restart)
+{% endif %}
 #local_preload_libraries = ''
 #session_preload_libraries = ''
 #jit_provider = 'llvmjit'		# JIT library to use

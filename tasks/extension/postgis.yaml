@@ -1,0 +1,16 @@
+- name: postgres | install | extension | postgis | add powertools repository
+  yum_repository:
+    name: powertools
+    description: Rocky Linux $releasever - PowerTools
+    file: external_repos
+    mirrorlist: https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=PowerTools-$releasever
+    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rockyofficial
+    enabled: yes
+
+- name: postgres | install | extension | postgis | enable powertools and install "{{postgis_version_pakage_name}}"
+  dnf:
+    enablerepo: powertools
+    name:
+      - "{{postgis_version_pakage_name}}"
+    state: present
+  when: postgis_install
