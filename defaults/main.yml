@@ -1,10 +1,7 @@
 ---
 # defaults file for postgres
 postgres_repo: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
-postgres_version: 13
-postgis_install: true
-postgis_version: 31
-postgis_version_pakage_name: postgis{{postgis_version}}_{{postgres_version}}
+postgres_version: 14
 pg_config_listen_addresses: localhost
 pg_config_port: 5432
 pg_config_max_connections: 1024
@@ -36,6 +33,7 @@ pg_config_shared_preload_libraries: []
 additional_extension:
   # - postgis
   - timescale
+  - PostgREST
 pg_hba_user_options:
   - contype: host
     users: all
@@ -57,3 +55,15 @@ pg_hba_user_options:
     source: 192.169.100.1/24
     databases: all
     method: md5
+
+# keepd as described in ufficial doc example:
+# https://postgrest.org/en/stable/tutorials/tut0.html
+postgrest_version: latest
+postgrest_db_uri: "postgres://authenticator:mysecretpassword@localhost:5432/postgres"
+postgrest_db_schemas: "api"
+postgrest_db_anon_role: "web_anon"
+# postgis
+postgis_version_pakage_name: postgis{{postgis_version}}_{{postgres_version}}
+postgis_install: true
+postgis_version: 31
+# Postgres configuration

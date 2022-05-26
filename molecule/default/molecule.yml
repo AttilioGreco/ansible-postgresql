@@ -4,9 +4,11 @@ driver:
   name: libvirt
 platforms:
   - name: instance-1
-    image_url: "http://remoteshare.4sigma.top/Rocky8.4-try-srinked.qcow2"
-    disk_size: "10G"
-    memory_size: "1" # in GB
+    # image_url: "http://127.0.0.1:8000/Rocky-8-GenericCloud-8.6-20220515.x86_64.qcow2"
+    image_url: "http://127.0.0.1:8000/Rocky-8-GenericCloud-8.5-20211114.2.x86_64.qcow2"
+    disk_size: "15G"
+    default_vcpu: 2
+    memory_size: "1"
 provisioner:
   name: ansible
 verifier:

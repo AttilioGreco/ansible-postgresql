@@ -8,7 +8,7 @@
   tasks:
   - name: Verify | check postgres is running
     ansible.builtin.systemd:
-      name: postgresql-13.service
+      name: postgresql-{{  }}.service
       state: started
 
   - name: create sql testing file

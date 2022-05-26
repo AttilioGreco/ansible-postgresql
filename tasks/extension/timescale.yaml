@@ -1,10 +1,10 @@
 
-- name: postgres | install | extension | timescale | add timescale repo
+- name: postgres | tasks | extension| timescale | install | add timescale repo
   ansible.builtin.template:
     src: installation/timescale.repo.j2
     dest: /etc/yum.repos.d/timescale_timescaledb.repo
 
-- name: postgres | install | install postgresql
+- name: postgres | tasks | extension| timescale | install | install timescaledb extension
   dnf:
     name:
       - timescaledb-2-postgresql-{{postgres_version}}

@@ -8,6 +8,10 @@
       delay: 15
       timeout: 60
 
+  - name: set timezone to Europe/Rome
+    timezone:
+      name: Europe/Rome
+
 - name: prepare
   hosts: all
   become: true
@@ -19,6 +23,10 @@
         - python3-pip
         - python3-devel
         - gcc
+        - net-tools
+        - vim
+        - iotop
+        - bash-completion
 
   - name: prepare | create ansible requirements
     ansible.builtin.file:

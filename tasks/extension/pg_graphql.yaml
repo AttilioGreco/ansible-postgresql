@@ -1,0 +1,51 @@
+- name: postgres | tasks | extension| pg_graphql | install requirements
+  dnf:
+    name:
+      - '@Development tools'
+      - git
+      - python2
+      - cmake
+      - postgresql{{ postgres_version }}-devel.x86_64
+    state: present
+
+- name: postgres | tasks | extension| pg_graphql | install graphql/libgraphqlparser | clone code from github
+  ansible.builtin.git:
+    repo: https://github.com/graphql/libgraphqlparser.git
+    dest: /opt/libgraphqlparser
+
+- name: postgres | tasks | extension| pg_graphql | install graphql/libgraphqlparser | cmake
+  ansible.builtin.command: cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .
+  args:
+    chdir: /opt/libgraphqlparser/
+    creates: /opt/libgraphqlparser/libgraphqlparser.so
+
+- name: postgres | tasks | extension| pg_graphql | install graphql/libgraphqlparser | make
+  ansible.builtin.command: make
+  args:
+    chdir: /opt/libgraphqlparser/
+    creates: /opt/libgraphqlparser/libgraphqlparser.so
+
+- name: postgres | tasks | extension| pg_graphql | install graphql/libgraphqlparser | make install
+  ansible.builtin.command: make install
+  args:
+    chdir: /opt/libgraphqlparser/
+    creates: /usr/local/lib/libgraphqlparser.so
+
+- name: postgres | tasks | extension| pg_graphql | install graphql/pg_graphql | clone code from github
+  ansible.builtin.git:
+    repo: https://github.com/supabase/pg_graphql.git
+    dest: /opt/pg_graphql
+
+- name: postgres | tasks | extension| pg_graphql | install graphql/pg_graphql | make
+  ansible.builtin.command: make install
+  environment:
+    PATH: "/usr/pgsql-{{postgres_version}}/bin/:{{ ansible_env.PATH }}"
+  args:
+    chdir: /opt/pg_graphql
+    creates: /opt/pg_graphql/pg_graphql.so
+
+- name: "postgres | tasks | extension| pg_graphql | install graphql/pg_graphql | create link to /usr/pgsql-{{ postgres_version }}/lib/libgraphqlparser.so"
+  ansible.builtin.file:
+    src: /usr/lib/libgraphqlparser.so
+    dest: "/usr/pgsql-{{ postgres_version }}/lib/libgraphqlparser.so"
+    state: link
