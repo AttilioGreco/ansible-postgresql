@@ -30,11 +30,17 @@
     state: present
     disable_gpg_check: yes
 
+- name: postgres | install | list postgresql
+  ansible.builtin.command: dnf -qy module list postgresql
+  register: postgresql_list_repo
+  ignore_errors: yes
+
 - name: postgres | install | disable postgresql module
   ansible.builtin.command: dnf -qy module disable postgresql
   register: postgresql_disable_repo
   args:
     creates: /etc/dnf/modules.d/postgresql.module
+  when: postgresql_list_repo.rc == 0
 
 - name: postgres | install | install postgresql
   dnf:

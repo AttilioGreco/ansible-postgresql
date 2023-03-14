@@ -1,11 +1,10 @@
 ---
 - name: Converge
   hosts: all
-  become: true
   tasks:
-    - name: "Include postgres"
+    - name: "Include postgresql.ansible_postgresql"
       include_role:
-        name: "ansible-postgresql"
+        name: "postgresql.ansible_postgresql"
       vars:
         pg_config_listen_addresses: '*'
         pg_hba_user_options:

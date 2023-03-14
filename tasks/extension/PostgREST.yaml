@@ -1,3 +1,8 @@
+- name: postgres | tasks | extension | PostgREST | install | install PostgREST
+  ansible.builtin.package:
+    name: xz
+    state: present
+
 - name: postgres | tasks | extension | PostgREST | create userand group | create group for postgrest
   ansible.builtin.group:
     name: postgrest

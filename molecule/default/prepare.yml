@@ -1,37 +1,25 @@
-- name: Connection Wait
+- name: install base packages
   hosts: all
-  become: true
-  gather_facts: no
   tasks:
-  - name: Wait 60 seconds, but only start checking after 15 seconds
-    wait_for_connection:
-      delay: 15
-      timeout: 60
-
-  - name: set timezone to Europe/Rome
-    timezone:
-      name: Europe/Rome
-
-- name: prepare
-  hosts: all
-  become: true
-  tasks:
-
-  - name: prepare | install python3-pip
-    dnf:
-      name:
-        - python3-pip
-        - python3-devel
-        - gcc
-        - net-tools
-        - vim
-        - iotop
-        - bash-completion
-
-  - name: prepare | create ansible requirements
-    ansible.builtin.file:
-      path: /home/molecule/ansible
-      state: directory
-      owner: molecule
-      group: molecule
-      mode: '0644'
+    # Make sure the default MySQL and SQLite
+    # schemas are installed in /usr/share/doc/
+    - name: molecule | prepare | install epel
+      package:
+        name:
+          - epel-release
+    - name: molecule | prepare | install base packages
+      package:
+        name:
+          - tar
+          - gzip
+          - unzip
+          - xz
+          - bzip2
+          - python3
+          - nc
+          - bind-utils
+          - htop
+          - vim
+          - glibc-langpack-en
+          - net-tools
+        state: present

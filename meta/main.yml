@@ -1,13 +1,12 @@
 galaxy_info:
-  role_name: role-postgres
+  role_name: ansible_postgreql
+  namespace: attiliogreco
   author: Attilio Greco
-  description: install postgres in REHL family
-  company: your company (optional)
+  description: install postgresql in REHL family
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value
   # issue_tracker_url: http://example.com/issue/tracker
-
   license: MIT
 
   min_ansible_version: 4
@@ -22,10 +21,13 @@ galaxy_info:
   # https://galaxy.ansible.com/api/v1/platforms/
   #
   platforms:
-  - name: Rocky linux
+  - name: Rockylinux
     versions:
-    - 8.4
+    - 8.7
+    - 9.1
 
   galaxy_tags: [database, postgres]
 
+
 dependencies: []
+
