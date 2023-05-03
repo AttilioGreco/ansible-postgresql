@@ -47,6 +47,7 @@
     name:
       - postgresql{{postgres_version}}
       - postgresql{{postgres_version}}-server
+      - postgresql{{postgres_version}}-contrib.x86_64
     state: present
 
 - name: postgres | install | epel-release
