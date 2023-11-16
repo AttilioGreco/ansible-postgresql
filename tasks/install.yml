@@ -30,12 +30,12 @@
     state: present
     disable_gpg_check: yes
 
-- name: postgres | install | list postgresql
+- name: postgres | install | check if postgresql module is enabled and register the result
   ansible.builtin.command: dnf -qy module list postgresql
   register: postgresql_list_repo
   ignore_errors: yes
 
-- name: postgres | install | disable postgresql module
+- name: postgres | install | disable postgresql module if enabled or skip
   ansible.builtin.command: dnf -qy module disable postgresql
   register: postgresql_disable_repo
   args:
@@ -47,7 +47,7 @@
     name:
       - postgresql{{postgres_version}}
       - postgresql{{postgres_version}}-server
-      - postgresql{{postgres_version}}-contrib.x86_64
+      - postgresql{{postgres_version}}-contrib
     state: present
 
 - name: postgres | install | epel-release
