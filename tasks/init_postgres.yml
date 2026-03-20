@@ -3,8 +3,8 @@
   ansible.builtin.command: /usr/pgsql-{{ postgres_version }}/bin/postgresql-{{ postgres_version }}-setup initdb
   register: postgresql_database_init
   args:
-    creates: /var/lib/pgsql/{{ postgres_version }}/initdb.log
-  changed_when: postgresql_database_init.rc == 0
+    creates: /var/lib/pgsql/{{ postgres_version }}/data/PG_VERSION
+  changed_when: postgresql_database_init.rc | default(1) == 0
   notify:
     - Start postgreql
 

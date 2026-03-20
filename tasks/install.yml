@@ -24,6 +24,11 @@
   ansible.builtin.debug:
     msg: "{{ pg_config_shared_preload_libraries }}"
 
+- name: Postgres | install | import PostgreSQL GPG key
+  ansible.builtin.rpm_key:
+    key: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL"
+    state: present
+
 - name: Postgres | install | install postgres repo
   ansible.builtin.dnf:
     name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_distribution_major_version }}-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
@@ -35,14 +40,17 @@
   register: postgresql_list_repo
   ignore_errors: true
   changed_when: false
+  when: ansible_distribution_major_version | int < 10
 
 - name: Postgres | install | disable postgresql module if enabled or skip
   ansible.builtin.command: dnf -qy module disable postgresql
   register: postgresql_disable_repo
   args:
     creates: /etc/dnf/modules.d/postgresql.module
-  when: postgresql_list_repo.rc == 0
-  changed_when: postgresql_disable_repo.rc == 0
+  when:
+    - ansible_distribution_major_version | int < 10
+    - postgresql_list_repo.rc == 0
+  changed_when: postgresql_disable_repo.rc | default(1) == 0
 
 - name: Postgres | install | install postgresql
   ansible.builtin.dnf:
