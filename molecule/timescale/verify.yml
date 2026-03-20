@@ -1,0 +1,32 @@
+---
+- name: Verify TimescaleDB
+  hosts: all
+  gather_facts: false
+  vars:
+    postgres_version: "{{ hostvars[inventory_hostname]['postgres_version'] | default('18') }}"
+  tasks:
+    - name: Verify | check postgresql service is running
+      ansible.builtin.systemd:
+        name: "postgresql-{{ postgres_version }}"
+      register: pg_service
+      failed_when: pg_service.status.ActiveState != 'active'
+
+    - name: Verify | check timescaledb extension is available
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c
+        "SELECT name FROM pg_available_extensions WHERE name = 'timescaledb';" postgres
+      become: true
+      become_user: postgres
+      register: timescale_check
+      changed_when: false
+      failed_when: "'timescaledb' not in timescale_check.stdout"
+
+    - name: Verify | check timescaledb is in shared_preload_libraries
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c
+        "SHOW shared_preload_libraries;" postgres
+      become: true
+      become_user: postgres
+      register: preload_check
+      changed_when: false
+      failed_when: "'timescaledb' not in preload_check.stdout"

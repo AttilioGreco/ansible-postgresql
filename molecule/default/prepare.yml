@@ -27,4 +27,5 @@
           - vim
           - glibc-langpack-en
           - net-tools
+          - gnupg2
         state: present

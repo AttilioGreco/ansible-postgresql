@@ -1,0 +1,22 @@
+---
+- name: Verify PostGIS
+  hosts: all
+  gather_facts: false
+  vars:
+    postgres_version: "{{ hostvars[inventory_hostname]['postgres_version'] | default('18') }}"
+  tasks:
+    - name: Verify | check postgresql service is running
+      ansible.builtin.systemd:
+        name: "postgresql-{{ postgres_version }}"
+      register: pg_service
+      failed_when: pg_service.status.ActiveState != 'active'
+
+    - name: Verify | check postgis extension is available
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c
+        "SELECT name FROM pg_available_extensions WHERE name = 'postgis';" postgres
+      become: true
+      become_user: postgres
+      register: postgis_check
+      changed_when: false
+      failed_when: "'postgis' not in postgis_check.stdout"

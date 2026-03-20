@@ -1,10 +1,43 @@
 ---
-# This is an example playbook to execute Ansible tests.
-
 - name: Verify
   hosts: all
   gather_facts: false
+  vars:
+    postgres_version: "{{ hostvars[inventory_hostname]['postgres_version'] | default('18') }}"
+    pg_config_port: 5432
   tasks:
-  - name: Example assertion
-    ansible.builtin.assert:
-      that: true
+    - name: Verify | check postgresql service is running
+      ansible.builtin.systemd:
+        name: "postgresql-{{ postgres_version }}"
+      register: pg_service
+      failed_when: pg_service.status.ActiveState != 'active'
+
+    - name: Verify | check postgresql is listening on expected port
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ pg_config_port }}"
+        timeout: 10
+
+    - name: Verify | check postgresql accepts connections
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c "SELECT 1;" postgres
+      become: true
+      become_user: postgres
+      register: psql_check
+      changed_when: false
+      failed_when: psql_check.rc != 0
+
+    - name: Verify | check pg_stat_statements extension is loaded
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c "SELECT name FROM pg_available_extensions WHERE name = 'pg_stat_statements';" postgres
+      become: true
+      become_user: postgres
+      register: pg_stat_check
+      changed_when: false
+      failed_when: "'pg_stat_statements' not in pg_stat_check.stdout"
+
+    - name: Verify | check postgresql data directory exists
+      ansible.builtin.stat:
+        path: "/var/lib/pgsql/{{ postgres_version }}/data/postgresql.conf"
+      register: pg_conf
+      failed_when: not pg_conf.stat.exists

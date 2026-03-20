@@ -1,0 +1,17 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include ansible_postgresql with timescale extension"
+      ansible.builtin.include_role:
+        name: "ansible_postgresql"
+      vars:
+        pg_config_listen_addresses: '*'
+        additional_extension:
+          - timescale
+        pg_hba_user_options:
+          - contype: host
+            users: all
+            source: 127.0.0.1/32
+            databases: all
+            method: md5
