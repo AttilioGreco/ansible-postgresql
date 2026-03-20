@@ -1,14 +1,19 @@
 - name: install base packages
   hosts: all
+  gather_facts: false
   tasks:
-    # Make sure the default MySQL and SQLite
-    # schemas are installed in /usr/share/doc/
+    - name: molecule | prepare | bootstrap python3
+      ansible.builtin.raw: |
+        command -v python3 || dnf install -y python3
+      changed_when: false
+
     - name: molecule | prepare | install epel
-      package:
+      ansible.builtin.package:
         name:
           - epel-release
+
     - name: molecule | prepare | install base packages
-      package:
+      ansible.builtin.package:
         name:
           - tar
           - gzip
