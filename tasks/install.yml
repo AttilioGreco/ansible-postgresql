@@ -1,61 +1,63 @@
 ---
 - name: Distribution
-  debug:
+  ansible.builtin.debug:
     msg: "{{ ansible_distribution }}"
 
 - name: Distribution version
-  debug:
-    msg: "{{ ansible_distribution_version}}"
+  ansible.builtin.debug:
+    msg: "{{ ansible_distribution_version }}"
 
 - name: Distribution major version
-  debug:
+  ansible.builtin.debug:
     msg: "{{ ansible_distribution_major_version }}"
 
-- name: postgres | install | postgres pre-install show shared_preload_libraries list
-  debug:
+- name: Postgres | install | postgres pre-install show shared_preload_libraries list
+  ansible.builtin.debug:
     msg: "{{ pg_config_shared_preload_libraries + ['timescaledb'] }}"
 
-- name: postgres | install | timescale pre-install
-  set_fact:
+- name: Postgres | install | timescale pre-install
+  ansible.builtin.set_fact:
     pg_config_shared_preload_libraries: "{{ pg_config_shared_preload_libraries + ['timescaledb'] }}"
   when: '"timescale" in additional_extension'
 
-- name: postgres | install | postgres pre-install show shared_preload_libraries list
-  debug:
+- name: Postgres | install | postgres pre-install show shared_preload_libraries list
+  ansible.builtin.debug:
     msg: "{{ pg_config_shared_preload_libraries }}"
 
-- name: postgres | install | install postgres repo
-  dnf:
+- name: Postgres | install | install postgres repo
+  ansible.builtin.dnf:
     name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ ansible_distribution_major_version }}-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
     state: present
-    disable_gpg_check: yes
+    disable_gpg_check: false
 
-- name: postgres | install | check if postgresql module is enabled and register the result
+- name: Postgres | install | check if postgresql module is enabled and register the result
   ansible.builtin.command: dnf -qy module list postgresql
   register: postgresql_list_repo
-  ignore_errors: yes
+  ignore_errors: true
+  changed_when: false
 
-- name: postgres | install | disable postgresql module if enabled or skip
+- name: Postgres | install | disable postgresql module if enabled or skip
   ansible.builtin.command: dnf -qy module disable postgresql
   register: postgresql_disable_repo
   args:
     creates: /etc/dnf/modules.d/postgresql.module
   when: postgresql_list_repo.rc == 0
+  changed_when: postgresql_disable_repo.rc == 0
 
-- name: postgres | install | install postgresql
-  dnf:
+- name: Postgres | install | install postgresql
+  ansible.builtin.dnf:
     name:
-      - postgresql{{postgres_version}}
-      - postgresql{{postgres_version}}-server
-      - postgresql{{postgres_version}}-contrib
+      - postgresql{{ postgres_version }}
+      - postgresql{{ postgres_version }}-server
+      - postgresql{{ postgres_version }}-contrib
     state: present
 
-- name: postgres | install | epel-release
-  dnf:
+- name: Postgres | install | epel-release
+  ansible.builtin.dnf:
     name: epel-release
     state: present
 
-- name: postgres | install | install custom extension
-  include_tasks: "tasks/extension/{{ item }}.yaml"
+- name: Postgres | install | install custom extension
+  ansible.builtin.include_tasks: "extension/{{ item }}.yaml"
   with_items: "{{ additional_extension }}"
   # when: additional_extension

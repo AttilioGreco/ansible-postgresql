@@ -1,108 +1,110 @@
-- name: postgres | tasks | extension | PostgREST | install | install PostgREST
+---
+- name: Postgres | tasks | extension | PostgREST | install xz
   ansible.builtin.package:
     name: xz
     state: present
 
-- name: postgres | tasks | extension | PostgREST | create userand group | create group for postgrest
+- name: Postgres | tasks | extension | PostgREST | create group for postgrest
   ansible.builtin.group:
     name: postgrest
     state: present
-    system: yes
+    system: true
 
-- name: postgres | tasks | extension | PostgREST | create userand group | create user for postgrest
+- name: Postgres | tasks | extension | PostgREST | create user for postgrest
   ansible.builtin.user:
     name: postgrest
     group: postgrest
-    createhome: no
-    system: yes
+    createhome: false
+    system: true
     state: present
 
-- name: postgres | tasks | extension | PostgREST | get tags | show version selected
-  debug:
+- name: Postgres | tasks | extension | PostgREST | show version selected
+  ansible.builtin.debug:
     var: postgrest_version
 
-- name: postgres | tasks | extension | PostgREST | install get latest version
+- name: Postgres | tasks | extension | PostgREST | install get latest version
+  when: postgrest_version == 'latest'
   block:
-    - name: postgres | tasks | extension | PostgREST | get tags | get latest restic tags from github API
-      uri:
+    - name: Postgres | tasks | extension | PostgREST | get latest release tag from github API
+      ansible.builtin.uri:
         url: https://api.github.com/repos/PostgREST/postgrest/releases/latest
         method: GET
         status_code: 200
       register: github_json_response
 
-    - name: postgres | tasks | extension | PostgREST | get tags | parsing github api response and set PostgREST version
-      set_fact:
+    - name: Postgres | tasks | extension | PostgREST | set postgrest_version from github API response
+      ansible.builtin.set_fact:
         postgrest_version: "{{ github_json_response.json.tag_name }}"
 
-  when: postgrest_version == 'latest'
-
-- name: postgres | tasks | extension | PostgREST | get tags | show version selected
-  debug:
+- name: Postgres | tasks | extension | PostgREST | show version selected after resolution
+  ansible.builtin.debug:
     var: postgrest_version
 
-- name: postgres | tasks | extension | PostgREST | create directory tree | PostgREST/
+- name: Postgres | tasks | extension | PostgREST | create directory /opt/PostgREST/
   ansible.builtin.file:
     path: /opt/PostgREST/
     state: directory
-    mode: '0755'
+    mode: "0755"
 
-- name: postgres | tasks | extension | PostgREST | create directory tree | tar_archive
+- name: Postgres | tasks | extension | PostgREST | create directory tar_archive
   ansible.builtin.file:
     path: /opt/PostgREST/tar_archive
     state: directory
-    mode: '0755'
+    mode: "0755"
 
-- name: postgres | tasks | extension | PostgREST | create directory tree | "postgrest-{{postgrest_version}}"
+- name: Postgres | tasks | extension | PostgREST | create versioned directory for postgrest
   ansible.builtin.file:
-    path: /opt/PostgREST/postgrest-{{postgrest_version}}/
+    path: "/opt/PostgREST/postgrest-{{ postgrest_version }}/"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
-- name: postgres | tasks | extension | PostgREST | create directory tree | create /etc/postgrest/ configuration directory
+- name: Postgres | tasks | extension | PostgREST | create /etc/postgrest/ configuration directory
   ansible.builtin.file:
     path: /etc/postgrest/
     state: directory
-    mode: '0755'
+    mode: "0755"
 
-- name: postgres | tasks | extension | PostgREST | check if "postgrest-{{postgrest_version}}-linux-static-x64.tar.xz exist"
-  stat:
-    path: /opt/PostgREST/postgrest-{{postgrest_version}}-linux-static-x64.tar.xz
+- name: Postgres | tasks | extension | PostgREST | check if archive exists
+  ansible.builtin.stat:
+    path: "/opt/PostgREST/postgrest-{{ postgrest_version }}-linux-static-x64.tar.xz"
   register: postgrest_archive_exist
 
-- name: postgres | tasks | extension | PostgREST | Download binary "postgrest-{{postgrest_version}}-linux-static-x64.tar.xz"
-  get_url:
-    url: https://github.com/PostgREST/postgrest/releases/download/{{ postgrest_version }}/postgrest-{{postgrest_version}}-linux-static-x64.tar.xz
-    dest: /opt/PostgREST/postgrest-{{postgrest_version}}-linux-static-x64.tar.xz
+- name: Postgres | tasks | extension | PostgREST | download binary archive
+  ansible.builtin.get_url:
+    url: "https://github.com/PostgREST/postgrest/releases/download/{{ postgrest_version }}/postgrest-{{ postgrest_version }}-linux-static-x64.tar.xz"
+    dest: "/opt/PostgREST/postgrest-{{ postgrest_version }}-linux-static-x64.tar.xz"
+    mode: "0644"
   when: not postgrest_archive_exist.stat.exists
 
-- name: postgres | tasks | extension | PostgREST | Unarchive "postgrest-{{postgrest_version}}-linux-static-x64.tar.xz"
+- name: Postgres | tasks | extension | PostgREST | unarchive binary archive
   ansible.builtin.unarchive:
-    src: /opt/PostgREST/postgrest-{{postgrest_version}}-linux-static-x64.tar.xz
-    dest: /opt/PostgREST/postgrest-{{postgrest_version}}/
-    remote_src: yes
+    src: "/opt/PostgREST/postgrest-{{ postgrest_version }}-linux-static-x64.tar.xz"
+    dest: "/opt/PostgREST/postgrest-{{ postgrest_version }}/"
+    remote_src: true
 
-- name: postgres | tasks | extension | PostgREST | create directory tree | create symlink to latest version
+- name: Postgres | tasks | extension | PostgREST | create symlink to current version
   ansible.builtin.file:
-    src: /opt/PostgREST/postgrest-{{postgrest_version}}/postgrest
+    src: "/opt/PostgREST/postgrest-{{ postgrest_version }}/postgrest"
     dest: /opt/PostgREST/postgrest_current
     state: link
-    mode: '0755'
+    mode: "0755"
   notify:
-    - restarted postgrest
+    - Restarted postgrest
 
-- name: postgres | tasks | extension | PostgREST | create systemd service
+- name: Postgres | tasks | extension | PostgREST | create systemd service
   ansible.builtin.template:
     dest: /etc/systemd/system/postgrest.service
     src: installation/postgrest.service.j2
+    mode: "0644"
   notify:
-    - reloaded postgrest
+    - Reloaded postgrest
 
-- name: postgres | tasks | extension | PostgREST | create PostgREST configuration file
+- name: Postgres | tasks | extension | PostgREST | create configuration file
   ansible.builtin.template:
     src: installation/postgrest.conf.j2
     dest: /etc/postgrest/postgrest.conf
-    mode: '0644'
+    mode: "0644"
     owner: postgres
     group: postgres
   notify:
-    - restarted postgrest
+    - Restarted postgrest

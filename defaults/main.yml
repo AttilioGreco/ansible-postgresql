@@ -32,9 +32,9 @@ pg_config_shared_preload_libraries:
 #   max_parallel_workers = 2
 #   max_parallel_maintenance_workers = 1
 additional_extension: []
-  # - postgis
-  # - timescale
-  # - PostgREST
+# - postgis
+# - timescale
+# - PostgREST
 pg_hba_user_options:
   - contype: host
     users: all
@@ -64,7 +64,7 @@ postgrest_db_uri: "postgres://authenticator:mysecretpassword@localhost:5432/post
 postgrest_db_schemas: "api"
 postgrest_db_anon_role: "web_anon"
 # postgis
-postgis_version_pakage_name: postgis{{postgis_version}}_{{postgres_version}}
+postgis_version_pakage_name: postgis{{ postgis_version }}_{{ postgres_version }}
 postgis_install: true
 postgis_version: 31
 # Postgres configuration

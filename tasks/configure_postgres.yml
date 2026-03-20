@@ -1,22 +1,23 @@
-- name: postgresql | configure postgres | configure pg_hba
+---
+- name: Postgresql | configure postgres | configure pg_hba
   community.postgresql.postgresql_pg_hba:
-    dest: /var/lib/pgsql/{{postgres_version}}/data/pg_hba.conf
+    dest: /var/lib/pgsql/{{ postgres_version }}/data/pg_hba.conf
     contype: "{{ item.contype }}"
     users: "{{ item.users }}"
     source: "{{ item.source }}"
     databases: "{{ item.databases }}"
     method: "{{ item.method }}"
     create: true
-  loop: "{{pg_hba_user_options}}"
+  loop: "{{ pg_hba_user_options }}"
   notify:
-    - reloaded postgreql
+    - Reloaded postgreql
 
-- name: postgresql | configure postgres | configure postgresql-config
+- name: Postgresql | configure postgres | configure postgresql-config
   ansible.builtin.template:
     src: postgresql.conf.j2
-    dest: /var/lib/pgsql/{{postgres_version}}/data/postgresql.conf
+    dest: /var/lib/pgsql/{{ postgres_version }}/data/postgresql.conf
     owner: postgres
     group: postgres
-    mode: '0600'
+    mode: "0600"
   notify:
-    - restart postgreql
+    - Restart postgreql

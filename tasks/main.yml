@@ -1,4 +1,9 @@
 ---
-- import_tasks: tasks/install.yml
-- import_tasks: tasks/init_postgres.yml
-- import_tasks: configure_postgres.yml
+- name: Install PostgreSQL
+  ansible.builtin.import_tasks: install.yml
+
+- name: Initialize PostgreSQL
+  ansible.builtin.import_tasks: init_postgres.yml
+
+- name: Configure PostgreSQL
+  ansible.builtin.import_tasks: configure_postgres.yml

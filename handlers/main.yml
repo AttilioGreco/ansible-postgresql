@@ -1,32 +1,32 @@
 ---
 # handlers file for postgres
-- name: start postgreql
+- name: Start postgreql
   ansible.builtin.systemd:
     state: started
-    name: "postgresql-{{postgres_version}}"
-    enabled: yes
+    name: "postgresql-{{ postgres_version }}"
+    enabled: true
 
-- name: restart postgreql
+- name: Restart postgreql
   ansible.builtin.systemd:
     state: restarted
-    name: "postgresql-{{postgres_version}}"
+    name: "postgresql-{{ postgres_version }}"
 
-- name: reloaded postgreql
+- name: Reloaded postgreql
   ansible.builtin.systemd:
     state: reloaded
-    name: "postgresql-{{postgres_version}}"
+    name: "postgresql-{{ postgres_version }}"
 
-- name: reloaded postgrest
+- name: Reloaded postgrest
   ansible.builtin.systemd:
     state: reloaded
     name: "postgrest"
 
-- name: started postgrest
+- name: Started postgrest
   ansible.builtin.systemd:
     state: started
     name: "postgrest"
 
-- name: restarted postgrest
+- name: Restarted postgrest
   ansible.builtin.systemd:
     state: restarted
     name: "postgrest"

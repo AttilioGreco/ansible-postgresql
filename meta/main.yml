@@ -1,3 +1,4 @@
+---
 galaxy_info:
   role_name: ansible_postgreql
   namespace: attiliogreco
@@ -9,7 +10,7 @@ galaxy_info:
   # issue_tracker_url: http://example.com/issue/tracker
   license: MIT
 
-  min_ansible_version: 4
+  min_ansible_version: "2.9"
 
   # If this a Container Enabled role, provide the minimum Ansible Container version.
   # min_ansible_container_version:
@@ -21,13 +22,9 @@ galaxy_info:
   # https://galaxy.ansible.com/api/v1/platforms/
   #
   platforms:
-  - name: Rockylinux
-    versions:
-    - 8.7
-    - 9.1
+    - name: EL
+      versions:
+        - all
 
   galaxy_tags: [database, postgres]
-
-
 dependencies: []
-
