@@ -1,17 +1,14 @@
 ---
-- name: Postgres | install | extension | postgis | add powertools repository
-  ansible.builtin.yum_repository:
-    name: powertools
-    description: Rocky Linux $releasever - PowerTools
-    file: external_repos
-    mirrorlist: https://mirrors.rockylinux.org/mirrorlist?arch=$basearch&repo=PowerTools-$releasever
-    gpgkey: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rockyofficial
-    enabled: true
+- name: Postgres | extension | postgis | enable CRB/PowerTools repository
+  ansible.builtin.command: >
+    dnf config-manager --set-enabled
+    {{ 'crb' if ansible_distribution_major_version | int >= 9 else 'powertools' }}
+  changed_when: false
 
-- name: Postgres | install | extension | postgis | enable powertools and install postgis
+- name: Postgres | extension | postgis | install postgis
   ansible.builtin.dnf:
-    enablerepo: powertools
     name:
-      - "{{ postgis_version_pakage_name }}"
+      - postgis{{ postgis_version }}_{{ postgres_version }}
     state: present
-  when: postgis_install
+  notify:
+    - Restart postgresql

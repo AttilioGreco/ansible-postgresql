@@ -14,4 +14,4 @@
             users: all
             source: 127.0.0.1/32
             databases: all
-            method: md5
+            method: scram-sha-256

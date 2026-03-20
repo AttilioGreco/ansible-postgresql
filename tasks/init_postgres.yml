@@ -1,13 +1,11 @@
 ---
+- name: Postgres | init_postgres | check if database is already initialized
+  ansible.builtin.stat:
+    path: /var/lib/pgsql/{{ postgres_version }}/data/PG_VERSION
+  register: pgdata_version
+
 - name: Postgres | init_postgres | init database
   ansible.builtin.command: /usr/pgsql-{{ postgres_version }}/bin/postgresql-{{ postgres_version }}-setup initdb
-  register: postgresql_database_init
-  args:
-    creates: /var/lib/pgsql/{{ postgres_version }}/data/PG_VERSION
-  changed_when: postgresql_database_init.rc | default(1) == 0
+  when: not pgdata_version.stat.exists
   notify:
-    - Start postgreql
-
-- name: Postgres | init_postgres | show postgres init result
-  ansible.builtin.debug:
-    var: postgresql_database_init
+    - Start postgresql

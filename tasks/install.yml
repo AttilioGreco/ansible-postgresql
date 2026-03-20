@@ -1,28 +1,8 @@
 ---
-- name: Distribution
-  ansible.builtin.debug:
-    msg: "{{ ansible_distribution }}"
-
-- name: Distribution version
-  ansible.builtin.debug:
-    msg: "{{ ansible_distribution_version }}"
-
-- name: Distribution major version
-  ansible.builtin.debug:
-    msg: "{{ ansible_distribution_major_version }}"
-
-- name: Postgres | install | postgres pre-install show shared_preload_libraries list
-  ansible.builtin.debug:
-    msg: "{{ pg_config_shared_preload_libraries + ['timescaledb'] }}"
-
 - name: Postgres | install | timescale pre-install
   ansible.builtin.set_fact:
     pg_config_shared_preload_libraries: "{{ pg_config_shared_preload_libraries + ['timescaledb'] }}"
   when: '"timescale" in additional_extension'
-
-- name: Postgres | install | postgres pre-install show shared_preload_libraries list
-  ansible.builtin.debug:
-    msg: "{{ pg_config_shared_preload_libraries }}"
 
 - name: Postgres | install | import PostgreSQL GPG key
   ansible.builtin.rpm_key:
@@ -35,22 +15,20 @@
     state: present
     disable_gpg_check: false
 
-- name: Postgres | install | check if postgresql module is enabled and register the result
-  ansible.builtin.command: dnf -qy module list postgresql
-  register: postgresql_list_repo
+- name: Postgres | install | check if postgresql module is already disabled
+  ansible.builtin.shell:
+    cmd: dnf -qy module list postgresql 2>/dev/null | grep -q '\[d\]'
+  register: postgresql_module_disabled
   ignore_errors: true
   changed_when: false
   when: ansible_distribution_major_version | int < 10
 
-- name: Postgres | install | disable postgresql module if enabled or skip
+- name: Postgres | install | disable postgresql module if not already disabled
   ansible.builtin.command: dnf -qy module disable postgresql
-  register: postgresql_disable_repo
-  args:
-    creates: /etc/dnf/modules.d/postgresql.module
   when:
     - ansible_distribution_major_version | int < 10
-    - postgresql_list_repo.rc == 0
-  changed_when: postgresql_disable_repo.rc | default(1) == 0
+    - postgresql_module_disabled.rc | default(0) != 0
+  changed_when: true
 
 - name: Postgres | install | install postgresql
   ansible.builtin.dnf:
@@ -67,5 +45,4 @@
 
 - name: Postgres | install | install custom extension
   ansible.builtin.include_tasks: "extension/{{ item }}.yaml"
-  with_items: "{{ additional_extension }}"
-  # when: additional_extension
+  loop: "{{ additional_extension }}"

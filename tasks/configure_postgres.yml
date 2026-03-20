@@ -10,7 +10,7 @@
     create: true
   loop: "{{ pg_hba_user_options }}"
   notify:
-    - Reloaded postgreql
+    - Reload postgresql
 
 - name: Postgresql | configure postgres | configure postgresql-config
   ansible.builtin.template:
@@ -20,4 +20,10 @@
     group: postgres
     mode: "0600"
   notify:
-    - Restart postgreql
+    - Restart postgresql
+
+- name: Postgresql | configure postgres | ensure postgresql service is started and enabled
+  ansible.builtin.systemd:
+    name: "postgresql-{{ postgres_version }}"
+    state: started
+    enabled: true
