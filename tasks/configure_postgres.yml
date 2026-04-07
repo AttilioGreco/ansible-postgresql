@@ -1,13 +1,27 @@
 ---
+- name: Postgresql | configure postgres | ensure postgresql service is stopped
+  ansible.builtin.systemd:
+    name: "postgresql-{{ postgres_version }}"
+    state: stopped
+
+- name: Postgresql | configure postgres | move default pg_hba.conf on first install
+  ansible.builtin.command:
+    cmd: mv /var/lib/pgsql/{{ postgres_version }}/data/pg_hba.conf /var/lib/pgsql/{{ postgres_version }}/data/pg_hba.conf.default
+    removes: /var/lib/pgsql/{{ postgres_version }}/data/pg_hba.conf
+  when: not pgdata_version.stat.exists
+
 - name: Postgresql | configure postgres | configure pg_hba
   community.postgresql.postgresql_pg_hba:
     dest: /var/lib/pgsql/{{ postgres_version }}/data/pg_hba.conf
     contype: "{{ item.contype }}"
     users: "{{ item.users }}"
-    source: "{{ item.source }}"
+    source: "{{ item.source | default(omit) }}"
     databases: "{{ item.databases }}"
     method: "{{ item.method }}"
     create: true
+    owner: postgres
+    group: postgres
+    mode: "0600"
   loop: "{{ pg_hba_user_options }}"
   notify:
     - Reload postgresql

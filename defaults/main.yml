@@ -37,24 +37,38 @@ additional_extension: []
 # - postgis
 # - timescale
 pg_hba_user_options:
+  # local   replication     all                                     peer
+  - contype: local
+    users: all
+    databases: replication
+    method: peer
+  # local   all             all                                     peer
+  - contype: local
+    users: all
+    databases: all
+    method: peer
+  # host    replication     all             127.0.0.1/32            scram-sha-256
+  - contype: host
+    users: all
+    source: 127.0.0.1/32
+    databases: replication
+    method: scram-sha-256
+  # host    replication     all             ::1/128                 scram-sha-256
+  - contype: host
+    users: all
+    source: ::1/128
+    databases: replication
+    method: scram-sha-256
+  # host    all             all             127.0.0.1/32            md5
   - contype: host
     users: all
     source: 127.0.0.1/32
     databases: all
-    method: scram-sha-256
+    method: md5
+  # host    all             all             ::1/128                 scram-sha-256
   - contype: host
     users: all
-    source: 192.168.100.0/24
-    databases: all
-    method: scram-sha-256
-  - contype: host
-    users: all
-    source: 192.168.200.0/24
-    databases: all
-    method: scram-sha-256
-  - contype: host
-    users: all
-    source: 192.169.100.0/24
+    source: ::1/128
     databases: all
     method: scram-sha-256
 
