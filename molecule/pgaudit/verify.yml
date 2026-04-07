@@ -1,0 +1,52 @@
+---
+- name: Verify pgaudit
+  hosts: all
+  gather_facts: false
+  vars:
+    postgres_version: "{{ hostvars[inventory_hostname]['postgres_version'] | default('18') }}"
+  tasks:
+    - name: Verify | check postgresql service is running
+      ansible.builtin.systemd:
+        name: "postgresql-{{ postgres_version }}"
+      register: pg_service
+      failed_when: pg_service.status.ActiveState != 'active'
+
+    - name: Verify | check pgaudit extension is available
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c
+        "SELECT name FROM pg_available_extensions WHERE name = 'pgaudit';" postgres
+      become: true
+      become_user: postgres
+      register: pgaudit_check
+      changed_when: false
+      failed_when: "'pgaudit' not in pgaudit_check.stdout"
+
+    - name: Verify | check pgaudit is in shared_preload_libraries
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c
+        "SHOW shared_preload_libraries;" postgres
+      become: true
+      become_user: postgres
+      register: preload_check
+      changed_when: false
+      failed_when: "'pgaudit' not in preload_check.stdout"
+
+    - name: Verify | check pgaudit.log is set to all
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c
+        "SHOW pgaudit.log;" postgres
+      become: true
+      become_user: postgres
+      register: pgaudit_log_check
+      changed_when: false
+      failed_when: "'all' not in pgaudit_log_check.stdout"
+
+    - name: Verify | check pgaudit.log_catalog is on
+      ansible.builtin.command: >
+        /usr/pgsql-{{ postgres_version }}/bin/psql -U postgres -c
+        "SHOW pgaudit.log_catalog;" postgres
+      become: true
+      become_user: postgres
+      register: pgaudit_catalog_check
+      changed_when: false
+      failed_when: "'on' not in pgaudit_catalog_check.stdout"

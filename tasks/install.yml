@@ -1,9 +1,4 @@
 ---
-- name: Postgres | install | timescale pre-install
-  ansible.builtin.set_fact:
-    pg_config_shared_preload_libraries: "{{ pg_config_shared_preload_libraries + ['timescaledb'] }}"
-  when: '"timescale" in additional_extension'
-
 - name: Postgres | install | import PostgreSQL GPG key
   ansible.builtin.rpm_key:
     key: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL"
@@ -16,19 +11,43 @@
     disable_gpg_check: false
 
 - name: Postgres | install | check if postgresql module is already disabled
-  ansible.builtin.shell:
-    cmd: dnf -qy module list postgresql 2>/dev/null | grep -q '\[d\]'
+  ansible.builtin.command:
+    cmd: dnf -qy module list postgresql
   register: postgresql_module_disabled
   ignore_errors: true
   changed_when: false
+  failed_when: "'[d]' not in postgresql_module_disabled.stdout"
   when: ansible_distribution_major_version | int < 10
 
 - name: Postgres | install | disable postgresql module if not already disabled
-  ansible.builtin.command: dnf -qy module disable postgresql
+  ansible.builtin.command:
+    cmd: dnf -qy module disable postgresql
   when:
     - ansible_distribution_major_version | int < 10
     - postgresql_module_disabled.rc | default(0) != 0
   changed_when: true
+
+- name: Postgres | install | get enabled pgdg repos
+  ansible.builtin.command:
+    cmd: dnf repolist --enabled
+  register: pgdg_repolist
+  changed_when: false
+
+- name: Postgres | install | disable pgdg repos for other versions
+  ansible.builtin.ini_file:
+    path: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: "{{ item }}"
+    option: enabled
+    value: "0"
+    no_extra_spaces: true
+  loop: >-
+    {{ pgdg_repolist.stdout_lines
+       | select('match', '^pgdg')
+       | reject('match', '^pgdg-common')
+       | reject('match', '^pgdg' ~ postgres_version | string ~ '(\s|$|-)')
+       | map('split', ' ')
+       | map('first')
+       | list }}
 
 - name: Postgres | install | install postgresql
   ansible.builtin.dnf:

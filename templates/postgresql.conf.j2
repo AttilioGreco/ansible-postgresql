@@ -783,10 +783,15 @@ shared_preload_libraries = '{{ pg_config_shared_preload_libraries | join(',') }}
 #include_if_exists = '...'		# include file only if it exists
 #include = '...'			# include file
 
+{% if 'pgaudit' in additional_extension %}
+#------------------------------------------------------------------------------
+# PGAUDIT OPTIONS
+#------------------------------------------------------------------------------
+{{ pg_pgaudit_config }}
+{% endif %}
 
 #------------------------------------------------------------------------------
 # CUSTOMIZED OPTIONS
 #------------------------------------------------------------------------------
 
-# Add settings for extensions here
 {{pg_config_row}}

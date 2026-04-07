@@ -1,0 +1,14 @@
+---
+- name: Postgres | extension | pgaudit | pre-install
+  ansible.builtin.set_fact:
+    pg_config_shared_preload_libraries: "{{ pg_config_shared_preload_libraries + ['pgaudit'] }}"
+
+- name: Postgres | extension | pgaudit | install pgaudit extension
+  ansible.builtin.dnf:
+    name: pgaudit_{{ postgres_version }}.x86_64
+    state: present
+  become: true
+  notify:
+    - Restart postgresql
+
+

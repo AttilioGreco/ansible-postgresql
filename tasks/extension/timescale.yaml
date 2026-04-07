@@ -1,4 +1,8 @@
 ---
+- name: Postgres | extension | timescale | pre-install
+  ansible.builtin.set_fact:
+    pg_config_shared_preload_libraries: "{{ pg_config_shared_preload_libraries + ['timescaledb'] }}"
+
 - name: Postgres | extension | timescale | import GPG key
   ansible.builtin.rpm_key:
     key: https://packagecloud.io/timescale/timescaledb/gpgkey
